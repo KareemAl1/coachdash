@@ -10,6 +10,7 @@ export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [demoLoading, setDemoLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -18,10 +19,8 @@ export default function LoginPage() {
       setError('Please fill in all fields.');
       return;
     }
-
     setLoading(true);
     setError(null);
-
     try {
       const { token, user } = await authAPI.login(email, password);
       setToken(token);
@@ -33,10 +32,23 @@ export default function LoginPage() {
     }
   };
 
+  const handleDemo = async () => {
+    setDemoLoading(true);
+    setError(null);
+    try {
+      const { token, user } = await authAPI.login('demo@coachdash.app', 'Demo1234');
+      setToken(token);
+      localStorage.setItem('coachdash_user', JSON.stringify(user));
+      router.push('/');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Demo login failed');
+      setDemoLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-bg-base flex items-center justify-center p-4">
       <div className="w-full max-w-sm">
-        {/* Logo */}
         <div className="flex items-center gap-2.5 mb-8 justify-center">
           <div className="w-8 h-8 bg-accent rounded-lg flex items-center justify-center">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -89,13 +101,40 @@ export default function LoginPage() {
               {loading ? (
                 <>
                   <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  Signing in…
+                  Signing in...
                 </>
               ) : (
                 'Sign in'
               )}
             </button>
           </form>
+
+          <div className="relative my-5">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-bg-border" />
+            </div>
+            <div className="relative flex justify-center text-xs text-text-muted">
+              <span className="bg-bg-card px-3">or</span>
+            </div>
+          </div>
+
+          <button
+            onClick={handleDemo}
+            disabled={demoLoading}
+            className="w-full bg-bg-elevated hover:bg-bg-border disabled:opacity-50 disabled:cursor-not-allowed text-text-primary font-semibold py-2.5 rounded-lg transition-colors flex items-center justify-center gap-2 border border-bg-border"
+          >
+            {demoLoading ? (
+              <>
+                <div className="w-4 h-4 border-2 border-text-muted border-t-transparent rounded-full animate-spin" />
+                Loading demo...
+              </>
+            ) : (
+              <>
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                Try Demo
+              </>
+            )}
+          </button>
         </div>
 
         <p className="text-center text-text-muted text-sm mt-5">
