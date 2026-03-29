@@ -8,8 +8,12 @@ import ActivityChart from '@/components/ActivityChart';
 import SkillBar from '@/components/SkillBar';
 import EntryCard from '@/components/EntryCard';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { getToken } from '@/lib/api';
 
 export default function DashboardPage() {
+  const router = useRouter();
+  useEffect(() => { if (!getToken()) router.replace('/login'); }, [router]);
   const [stats, setStats] = useState<Stats | null>(null);
   const [recentEntries, setRecentEntries] = useState<Entry[]>([]);
   const [loading, setLoading] = useState(true);
